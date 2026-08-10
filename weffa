@@ -1,15 +1,9 @@
--- SB MoneyGen LocalScript | Drop into StarterPlayerScripts
--- Client-side display only | max 1,750,000
-
 local ALLOWED_PLACE_ID = 13643807539
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- ════════════════════════════════════════
--- GAME DETECTOR
--- ════════════════════════════════════════
 
 if game.PlaceId ~= ALLOWED_PLACE_ID then
 	local errGui = Instance.new("ScreenGui")
@@ -59,13 +53,6 @@ if game.PlaceId ~= ALLOWED_PLACE_ID then
 	title.ZIndex = 3
 	title.Parent = card
 
-	local div = Instance.new("Frame")
-	div.Size = UDim2.new(1, -18, 0, 1)
-	div.Position = UDim2.new(0, 18, 0, 54)
-	div.BackgroundColor3 = Color3.fromRGB(60, 45, 75)
-	div.BorderSizePixel = 0
-	div.ZIndex = 3
-	div.Parent = card
 
 	local msg = Instance.new("TextLabel")
 	msg.Size = UDim2.new(1, -36, 0, 80)
@@ -128,9 +115,6 @@ if game.PlaceId ~= ALLOWED_PLACE_ID then
 	return
 end
 
--- ════════════════════════════════════════
--- MAIN SCRIPT
--- ════════════════════════════════════════
 
 local MAX = 1750000
 
@@ -162,9 +146,6 @@ local function getMoneyLabel()
 		end)()
 end
 
--- ════════════════════════════════════════
--- MAIN PANEL
--- ════════════════════════════════════════
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "SBMoneyGenGui"
@@ -221,7 +202,6 @@ btn.ZIndex = 101
 btn.Parent = frame
 Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 3)
 
--- Drag (mouse + mobile touch)
 local dragging, dragStart, startPos
 local UIS = game:GetService("UserInputService")
 
@@ -253,9 +233,6 @@ end
 frame.InputBegan:Connect(onDragStart)
 UIS.InputChanged:Connect(onDragMove)
 
--- ════════════════════════════════════════
--- OVERLAY
--- ════════════════════════════════════════
 
 local overlay = Instance.new("Frame")
 overlay.Size = UDim2.new(1, 0, 1, 0)
@@ -292,9 +269,6 @@ bigMoney.TextSize = 64
 bigMoney.ZIndex = 10001
 bigMoney.Parent = overlay
 
--- ════════════════════════════════════════
--- PROGRESS BAR
--- ════════════════════════════════════════
 
 local barGlowRing = Instance.new("Frame")
 barGlowRing.Visible = false
@@ -456,9 +430,6 @@ logPad.PaddingRight = UDim.new(0, 8)
 logPad.PaddingBottom = UDim.new(0, 10)
 logPad.Parent = logScroll
 
--- ════════════════════════════════════════
--- HELPERS
--- ════════════════════════════════════════
 
 local logLineCount = 0
 
@@ -547,9 +518,6 @@ local function fadeOutOverlay()
 	end
 end
 
--- ════════════════════════════════════════
--- SEQUENCE
--- ════════════════════════════════════════
 
 local DIM  = Color3.fromRGB(55, 75, 55)
 local OK   = Color3.fromRGB(0, 230, 90)
