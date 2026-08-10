@@ -1,0 +1,708 @@
+local ALLOWED_PLACE_ID = 130700367963690
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+if game.PlaceId ~= ALLOWED_PLACE_ID then
+	local errGui = Instance.new("ScreenGui")
+	errGui.Name = "PS2ErrorGui"
+	errGui.ResetOnSpawn = false
+	errGui.IgnoreGuiInset = true
+	errGui.DisplayOrder = 99999
+	errGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	errGui.Parent = playerGui
+
+	local backdrop = Instance.new("Frame")
+	backdrop.Size = UDim2.new(1, 0, 1, 0)
+	backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	backdrop.BackgroundTransparency = 0.4
+	backdrop.BorderSizePixel = 0
+	backdrop.ZIndex = 1
+	backdrop.Parent = errGui
+
+	local card = Instance.new("Frame")
+	card.AnchorPoint = Vector2.new(0.5, 0.5)
+	card.Size = UDim2.new(0, 380, 0, 210)
+	card.Position = UDim2.new(0.5, 0, 0.5, 0)
+	card.BackgroundColor3 = Color3.fromRGB(10, 12, 28)
+	card.BorderSizePixel = 0
+	card.ZIndex = 2
+	card.Parent = errGui
+	Instance.new("UICorner", card).CornerRadius = UDim.new(0, 8)
+
+	local stripe = Instance.new("Frame")
+	stripe.Size = UDim2.new(0, 3, 1, 0)
+	stripe.Position = UDim2.new(0, 0, 0, 0)
+	stripe.BackgroundColor3 = Color3.fromRGB(80, 120, 255)
+	stripe.BorderSizePixel = 0
+	stripe.ZIndex = 3
+	stripe.Parent = card
+	Instance.new("UICorner", stripe).CornerRadius = UDim.new(0, 8)
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, -20, 0, 44)
+	title.Position = UDim2.new(0, 18, 0, 12)
+	title.BackgroundTransparency = 1
+	title.Text = "Wrong Game"
+	title.TextColor3 = Color3.fromRGB(235, 235, 240)
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 20
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.ZIndex = 3
+	title.Parent = card
+
+	local msg = Instance.new("TextLabel")
+	msg.Size = UDim2.new(1, -36, 0, 80)
+	msg.Position = UDim2.new(0, 18, 0, 64)
+	msg.BackgroundTransparency = 1
+	msg.Text = "This script only works inside Philly Streets 2.\nYou're currently in the wrong game."
+	msg.TextColor3 = Color3.fromRGB(150, 155, 200)
+	msg.Font = Enum.Font.Gotham
+	msg.TextSize = 14
+	msg.TextWrapped = true
+	msg.TextXAlignment = Enum.TextXAlignment.Left
+	msg.LineHeight = 1.5
+	msg.ZIndex = 3
+	msg.Parent = card
+
+	local btnLeave = Instance.new("TextButton")
+	btnLeave.Size = UDim2.new(0, 148, 0, 38)
+	btnLeave.Position = UDim2.new(0, 18, 1, -52)
+	btnLeave.BackgroundColor3 = Color3.fromRGB(24, 26, 50)
+	btnLeave.BorderSizePixel = 0
+	btnLeave.Text = "Leave"
+	btnLeave.TextColor3 = Color3.fromRGB(160, 165, 210)
+	btnLeave.Font = Enum.Font.GothamSemibold
+	btnLeave.TextSize = 14
+	btnLeave.ZIndex = 3
+	btnLeave.Parent = card
+	Instance.new("UICorner", btnLeave).CornerRadius = UDim.new(0, 5)
+
+	local btnReconnect = Instance.new("TextButton")
+	btnReconnect.Size = UDim2.new(0, 178, 0, 38)
+	btnReconnect.Position = UDim2.new(1, -196, 1, -52)
+	btnReconnect.BackgroundColor3 = Color3.fromRGB(80, 120, 255)
+	btnReconnect.BorderSizePixel = 0
+	btnReconnect.Text = "Reconnect"
+	btnReconnect.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btnReconnect.Font = Enum.Font.GothamBold
+	btnReconnect.TextSize = 14
+	btnReconnect.ZIndex = 3
+	btnReconnect.Parent = card
+	Instance.new("UICorner", btnReconnect).CornerRadius = UDim.new(0, 5)
+
+	btnLeave.MouseEnter:Connect(function()
+		TweenService:Create(btnLeave, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(38, 42, 75)}):Play()
+	end)
+	btnLeave.MouseLeave:Connect(function()
+		TweenService:Create(btnLeave, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(24, 26, 50)}):Play()
+	end)
+	btnReconnect.MouseEnter:Connect(function()
+		TweenService:Create(btnReconnect, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(110, 145, 255)}):Play()
+	end)
+	btnReconnect.MouseLeave:Connect(function()
+		TweenService:Create(btnReconnect, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(80, 120, 255)}):Play()
+	end)
+	btnLeave.MouseButton1Click:Connect(function()
+		player:Kick("You left.")
+	end)
+	btnReconnect.MouseButton1Click:Connect(function()
+		errGui:Destroy()
+	end)
+	return
+end
+
+local MAX = 8000000
+
+local function fmt(n)
+	local s = tostring(math.floor(n)):reverse()
+	return "$" .. s:gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+end
+
+local function getMoneyLabels()
+	local found = {}
+
+	for _, desc in ipairs(playerGui:GetDescendants()) do
+		if desc:IsA("TextLabel") then
+			local n = desc.Name
+			if n == "cashLabel" then
+				table.insert(found, desc)
+			elseif n == "ValueLabel" then
+				local p = desc.Parent
+				if p then
+					local gp = p.Parent
+					if gp and (gp.Name == "CashDisplay" or gp.Name == "UpdateDisplay") then
+						table.insert(found, desc)
+					end
+				end
+			end
+		end
+	end
+
+	return found
+end
+
+local _overrideCancel = nil
+local function applyMoneyDisplay(value)
+	if _overrideCancel then
+		_overrideCancel()
+		_overrideCancel = nil
+	end
+
+	local formatted = fmt(value)
+	local running = true
+
+	_overrideCancel = function() running = false end
+
+	local conn = playerGui.DescendantAdded:Connect(function(desc)
+		if not running then return end
+		if desc:IsA("TextLabel") then
+			local n = desc.Name
+			if n == "cashLabel" or n == "ValueLabel" then
+				task.wait()
+				if running then desc.Text = formatted end
+			end
+		end
+	end)
+
+	task.spawn(function()
+		while running do
+			local labels = getMoneyLabels()
+			for _, lbl in ipairs(labels) do
+				if lbl and lbl.Parent then
+					lbl.Text = formatted
+				end
+			end
+			task.wait(0.1)
+		end
+		conn:Disconnect()
+	end)
+end
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PS2MoneyGenGui"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 9999
+screenGui.Parent = playerGui
+
+local frame = Instance.new("Frame")
+frame.Name = "Panel"
+frame.Size = UDim2.new(0, 180, 0, 58)
+frame.Position = UDim2.new(0.5, -90, 0.5, -29)
+frame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+frame.BorderSizePixel = 0
+frame.ZIndex = 100
+frame.Parent = screenGui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 4)
+
+local titleLbl = Instance.new("TextLabel")
+titleLbl.Size = UDim2.new(1, -12, 0, 20)
+titleLbl.Position = UDim2.new(0, 8, 0, 4)
+titleLbl.BackgroundTransparency = 1
+titleLbl.Text = "PS2  CASH TOOL"
+titleLbl.TextColor3 = Color3.fromRGB(160, 160, 170)
+titleLbl.Font = Enum.Font.Gotham
+titleLbl.TextSize = 10
+titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+titleLbl.ZIndex = 101
+titleLbl.Parent = frame
+
+local sub = Instance.new("TextLabel")
+sub.Size = UDim2.new(1, -20, 0, 18)
+sub.Position = UDim2.new(0, 10, 0, 30)
+sub.BackgroundTransparency = 1
+sub.Text = ""
+sub.TextColor3 = Color3.fromRGB(120, 120, 140)
+sub.Font = Enum.Font.Gotham
+sub.TextSize = 10
+sub.ZIndex = 101
+sub.Visible = false
+sub.Parent = frame
+
+local btn = Instance.new("TextButton")
+btn.Size = UDim2.new(1, -16, 0, 28)
+btn.Position = UDim2.new(0, 8, 0, 24)
+btn.BackgroundColor3 = Color3.fromRGB(38, 38, 50)
+btn.BorderSizePixel = 0
+btn.Text = "Add Funds"
+btn.TextColor3 = Color3.fromRGB(220, 220, 230)
+btn.Font = Enum.Font.Gotham
+btn.TextSize = 12
+btn.ZIndex = 101
+btn.Parent = frame
+Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 3)
+
+local dragging, dragStart, startPos
+local UIS = game:GetService("UserInputService")
+
+local function onDragStart(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end
+
+local function onDragMove(input)
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch) then
+		local d = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale, startPos.X.Offset + d.X,
+			startPos.Y.Scale, startPos.Y.Offset + d.Y
+		)
+	end
+end
+
+frame.InputBegan:Connect(onDragStart)
+UIS.InputChanged:Connect(onDragMove)
+
+local overlay = Instance.new("Frame")
+overlay.Size = UDim2.new(1, 0, 1, 0)
+overlay.Position = UDim2.new(0, 0, 0, 0)
+overlay.AnchorPoint = Vector2.new(0, 0)
+overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+overlay.BackgroundTransparency = 0
+overlay.BorderSizePixel = 0
+overlay.ZIndex = 9999
+overlay.Visible = false
+overlay.Parent = screenGui
+
+local statusHeader = Instance.new("TextLabel")
+statusHeader.AnchorPoint = Vector2.new(0.5, 0)
+statusHeader.Size = UDim2.new(0.7, 0, 0, 44)
+statusHeader.Position = UDim2.new(0.5, 0, 0.08, 0)
+statusHeader.BackgroundTransparency = 1
+statusHeader.Text = "STARTING MONEY GEN"
+statusHeader.TextColor3 = Color3.fromRGB(0, 255, 120)
+statusHeader.Font = Enum.Font.GothamBold
+statusHeader.TextSize = 22
+statusHeader.ZIndex = 10001
+statusHeader.Parent = overlay
+
+local bigMoney = Instance.new("TextLabel")
+bigMoney.AnchorPoint = Vector2.new(0.5, 0)
+bigMoney.Size = UDim2.new(0.5, 0, 0, 90)
+bigMoney.Position = UDim2.new(0.5, 0, 0.17, 0)
+bigMoney.BackgroundTransparency = 1
+bigMoney.Text = "$0"
+bigMoney.TextColor3 = Color3.fromRGB(255, 255, 255)
+bigMoney.Font = Enum.Font.GothamBold
+bigMoney.TextSize = 64
+bigMoney.ZIndex = 10001
+bigMoney.Parent = overlay
+
+local barGlowRing = Instance.new("Frame")
+barGlowRing.Visible = false
+barGlowRing.Parent = overlay
+
+local barBg = Instance.new("Frame")
+barBg.AnchorPoint = Vector2.new(0.5, 0.5)
+barBg.Size = UDim2.new(0.50, 0, 0, 22)
+barBg.Position = UDim2.new(0.5, 0, 0.345, 0)
+barBg.BackgroundColor3 = Color3.fromRGB(4, 10, 4)
+barBg.BorderSizePixel = 0
+barBg.ZIndex = 10001
+barBg.ClipsDescendants = true
+barBg.Parent = overlay
+Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
+
+local barFill = Instance.new("Frame")
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(0, 210, 80)
+barFill.BorderSizePixel = 0
+barFill.ZIndex = 10002
+barFill.ClipsDescendants = true
+barFill.Parent = barBg
+Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
+
+local barGrad = Instance.new("UIGradient")
+barGrad.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0,   Color3.fromRGB(0, 140, 50)),
+	ColorSequenceKeypoint.new(0.3, Color3.fromRGB(50, 230, 100)),
+	ColorSequenceKeypoint.new(0.6, Color3.fromRGB(140, 255, 100)),
+	ColorSequenceKeypoint.new(1,   Color3.fromRGB(60, 220, 80)),
+})
+barGrad.Rotation = 90
+barGrad.Parent = barFill
+
+local topShine = Instance.new("Frame")
+topShine.Size = UDim2.new(1, 0, 0, 4)
+topShine.Position = UDim2.new(0, 0, 0, 2)
+topShine.BackgroundColor3 = Color3.fromRGB(200, 255, 180)
+topShine.BackgroundTransparency = 0.3
+topShine.BorderSizePixel = 0
+topShine.ZIndex = 10005
+topShine.Parent = barFill
+Instance.new("UICorner", topShine).CornerRadius = UDim.new(1, 0)
+local shineGrad = Instance.new("UIGradient")
+shineGrad.Transparency = NumberSequence.new({
+	NumberSequenceKeypoint.new(0, 1),
+	NumberSequenceKeypoint.new(0.15, 0.2),
+	NumberSequenceKeypoint.new(0.85, 0.2),
+	NumberSequenceKeypoint.new(1, 1),
+})
+shineGrad.Parent = topShine
+
+local shimmer = Instance.new("Frame")
+shimmer.Size = UDim2.new(0.18, 0, 1, 0)
+shimmer.Position = UDim2.new(-0.2, 0, 0, 0)
+shimmer.BackgroundColor3 = Color3.fromRGB(220, 255, 210)
+shimmer.BackgroundTransparency = 0.5
+shimmer.BorderSizePixel = 0
+shimmer.ZIndex = 10004
+shimmer.Parent = barFill
+Instance.new("UICorner", shimmer).CornerRadius = UDim.new(1, 0)
+local shimGrad = Instance.new("UIGradient")
+shimGrad.Transparency = NumberSequence.new({
+	NumberSequenceKeypoint.new(0, 1),
+	NumberSequenceKeypoint.new(0.4, 0.3),
+	NumberSequenceKeypoint.new(0.6, 0.3),
+	NumberSequenceKeypoint.new(1, 1),
+})
+shimGrad.Rotation = 90
+shimGrad.Parent = shimmer
+
+task.spawn(function()
+	while shimmer and shimmer.Parent do
+		shimmer.Position = UDim2.new(-0.2, 0, 0, 0)
+		TweenService:Create(shimmer, TweenInfo.new(1.6, Enum.EasingStyle.Sine), {
+			Position = UDim2.new(1.1, 0, 0, 0)
+		}):Play()
+		task.wait(2.4)
+	end
+end)
+
+task.spawn(function()
+	while barFill and barFill.Parent do
+		task.wait(math.random(20, 50) / 100)
+		if not barFill.Parent then break end
+		local bub = Instance.new("Frame")
+		local sz = math.random(3, 7)
+		bub.Size = UDim2.new(0, sz, 0, sz)
+		bub.Position = UDim2.new(math.random(10, 88) / 100, 0, 0.9, 0)
+		bub.BackgroundColor3 = Color3.fromRGB(180, 255, 160)
+		bub.BackgroundTransparency = 0.35
+		bub.BorderSizePixel = 0
+		bub.ZIndex = 10003
+		bub.Parent = barFill
+		Instance.new("UICorner", bub).CornerRadius = UDim.new(1, 0)
+		TweenService:Create(bub, TweenInfo.new(math.random(6, 12) / 10, Enum.EasingStyle.Sine), {
+			Position = UDim2.new(bub.Position.X.Scale, 0, -0.3, 0),
+			BackgroundTransparency = 1,
+		}):Play()
+		task.delay(1.3, function() if bub and bub.Parent then bub:Destroy() end end)
+	end
+end)
+
+local pctLabel = Instance.new("TextLabel")
+pctLabel.AnchorPoint = Vector2.new(0.5, 0)
+pctLabel.Size = UDim2.new(0.52, 0, 0, 20)
+pctLabel.Position = UDim2.new(0.5, 0, 0.375, 0)
+pctLabel.BackgroundTransparency = 1
+pctLabel.Text = "0%"
+pctLabel.TextColor3 = Color3.fromRGB(80, 180, 80)
+pctLabel.Font = Enum.Font.Code
+pctLabel.TextSize = 11
+pctLabel.ZIndex = 10001
+pctLabel.Parent = overlay
+
+local totalLabel = Instance.new("TextLabel")
+totalLabel.AnchorPoint = Vector2.new(0.5, 0)
+totalLabel.Size = UDim2.new(0.5, 0, 0, 30)
+totalLabel.Position = UDim2.new(0.5, 0, 0.70, 0)
+totalLabel.BackgroundTransparency = 1
+totalLabel.Text = "TOTAL GENERATED: $0"
+totalLabel.TextColor3 = Color3.fromRGB(255, 200, 50)
+totalLabel.Font = Enum.Font.GothamBold
+totalLabel.TextSize = 15
+totalLabel.ZIndex = 10001
+totalLabel.Visible = false
+totalLabel.Parent = overlay
+
+local logFrame = Instance.new("Frame")
+logFrame.AnchorPoint = Vector2.new(0.5, 0)
+logFrame.Size = UDim2.new(0.48, 0, 0.26, 0)
+logFrame.Position = UDim2.new(0.5, 0, 0.41, 0)
+logFrame.BackgroundColor3 = Color3.fromRGB(4, 7, 4)
+logFrame.BorderSizePixel = 0
+logFrame.ZIndex = 10001
+logFrame.ClipsDescendants = true
+logFrame.Parent = overlay
+Instance.new("UICorner", logFrame).CornerRadius = UDim.new(0, 8)
+
+local logScroll = Instance.new("ScrollingFrame")
+logScroll.Size = UDim2.new(1, 0, 1, 0)
+logScroll.BackgroundTransparency = 1
+logScroll.BorderSizePixel = 0
+logScroll.ScrollBarThickness = 0
+logScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+logScroll.ZIndex = 10002
+logScroll.Parent = logFrame
+
+local logList = Instance.new("UIListLayout")
+logList.SortOrder = Enum.SortOrder.LayoutOrder
+logList.Padding = UDim.new(0, 4)
+logList.Parent = logScroll
+
+local logPad = Instance.new("UIPadding")
+logPad.PaddingLeft = UDim.new(0, 14)
+logPad.PaddingTop = UDim.new(0, 10)
+logPad.PaddingRight = UDim.new(0, 8)
+logPad.PaddingBottom = UDim.new(0, 10)
+logPad.Parent = logScroll
+
+local logLineCount = 0
+
+local function scrollToBottom()
+	local h = logList.AbsoluteContentSize.Y + 20
+	logScroll.CanvasSize = UDim2.new(0, 0, 0, h)
+	logScroll.CanvasPosition = Vector2.new(0, math.max(0, h - logScroll.AbsoluteSize.Y))
+end
+
+local function addLog(text, color)
+	logLineCount += 1
+	local line = Instance.new("TextLabel")
+	line.Size = UDim2.new(1, 0, 0, 22)
+	line.BackgroundTransparency = 1
+	line.Text = ""
+	line.TextColor3 = color or Color3.fromRGB(0, 200, 80)
+	line.Font = Enum.Font.Code
+	line.TextSize = 13
+	line.TextXAlignment = Enum.TextXAlignment.Left
+	line.LayoutOrder = logLineCount
+	line.ZIndex = 10003
+	line.Parent = logScroll
+	scrollToBottom()
+	local i = 0
+	local len = #text
+	while i < len do
+		i = math.min(i + 2, len)
+		line.Text = string.sub(text, 1, i)
+		scrollToBottom()
+		task.wait(0.04)
+	end
+end
+
+local function setBar(pct)
+	TweenService:Create(barFill, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+		Size = UDim2.new(pct, 0, 1, 0)
+	}):Play()
+	pctLabel.Text = math.floor(pct * 100) .. "%"
+end
+
+local function animateCounter(targetVal, duration)
+	local steps = 60
+	local stepTime = duration / steps
+	for i = 1, steps do
+		local eased = 1 - (1 - i/steps)^3
+		bigMoney.Text = fmt(math.floor(targetVal * eased))
+		task.wait(stepTime)
+	end
+	bigMoney.Text = fmt(targetVal)
+end
+
+local function pulse(label, big)
+	TweenService:Create(label, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {TextSize = big}):Play()
+	task.wait(0.28)
+	TweenService:Create(label, TweenInfo.new(0.14), {TextSize = 64}):Play()
+	task.wait(0.18)
+end
+
+local function fadeOutOverlay()
+	frame.Visible = false
+	barGlowRing.Visible = false
+
+	local textItems = {statusHeader, bigMoney, pctLabel, totalLabel}
+	for _, c in ipairs(textItems) do
+		TweenService:Create(c, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {TextTransparency = 1}):Play()
+	end
+	for _, c in ipairs({barBg, barFill, logFrame}) do
+		TweenService:Create(c, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {BackgroundTransparency = 1}):Play()
+	end
+	for _, c in ipairs(logScroll:GetChildren()) do
+		if c:IsA("TextLabel") then
+			TweenService:Create(c, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {TextTransparency = 1}):Play()
+		end
+	end
+	task.wait(0.6)
+
+	local steps = 60
+	for i = 1, steps do
+		if not overlay or not overlay.Parent then break end
+		overlay.BackgroundTransparency = i / steps
+		task.wait(0.9 / steps)
+	end
+
+	if screenGui and screenGui.Parent then
+		screenGui:Destroy()
+	end
+end
+
+local DIM  = Color3.fromRGB(55, 75, 55)
+local OK   = Color3.fromRGB(0, 230, 90)
+local GOLD = Color3.fromRGB(255, 200, 50)
+local CYAN = Color3.fromRGB(60, 220, 255)
+local RED  = Color3.fromRGB(255, 80, 80)
+
+local function runSequence()
+	bigMoney.Text = "$0"
+	bigMoney.TextColor3 = Color3.fromRGB(255, 255, 255)
+	bigMoney.TextSize = 64
+	bigMoney.TextTransparency = 0
+	barBg.BackgroundTransparency = 0
+	barGlowRing.Visible = false
+	barFill.Size = UDim2.new(0, 0, 1, 0)
+	pctLabel.Text = "0%"
+	pctLabel.TextTransparency = 0
+	statusHeader.TextTransparency = 0
+	statusHeader.Text = "INITIALIZING PS2 MONEY GEN"
+	statusHeader.TextColor3 = Color3.fromRGB(0, 255, 120)
+	logFrame.BackgroundTransparency = 0
+	totalLabel.Visible = false
+	totalLabel.TextTransparency = 0
+	for _, c in ipairs(logScroll:GetChildren()) do
+		if c:IsA("TextLabel") then c:Destroy() end
+	end
+	logScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	logLineCount = 0
+
+	local function pair(pending, ok, barPct)
+		addLog(pending, DIM)
+		addLog(ok, OK)
+		setBar(barPct)
+		task.wait(0.1)
+	end
+
+	pair("[ >> ] Establishing secure connection...",                 "[ OK ] Connection secured.",             0.02)
+	pair("[ >> ] Bypassing server-side anti-cheat...",              "[ OK ] Anti-cheat neutralized.",         0.04)
+	pair("[ >> ] Injecting PS2 Money Gen protocol...",              "[ OK ] Protocol loaded & active.",       0.06)
+
+	statusHeader.Text = "HEADING TO BLACK MARKET"
+	statusHeader.TextColor3 = Color3.fromRGB(0, 255, 120)
+	pair("[ >> ] Calculating Black Market coordinates...",          "[ OK ] Location locked.",                0.09)
+	pair("[ >> ] Teleporting to Black Market...",                   "[ OK ] Arrived at Black Market.",        0.12)
+	pair("[ >> ] Browsing inventory...",                            "[ OK ] Duffle Bag located in stock.",    0.15)
+	pair("[ >> ] Purchasing Duffle Bag...",                         "[ OK ] Duffle Bag acquired — $2,500.",   0.18)
+	pair("[ >> ] Equipping Duffle Bag...",                          "[ OK ] Duffle Bag equipped & ready.",    0.21)
+
+	statusHeader.Text = "INFILTRATING P-MOBILE"
+	statusHeader.TextColor3 = Color3.fromRGB(255, 165, 0)
+	pair("[ >> ] Teleporting to P-Mobile store...",                 "[ OK ] Arrived outside P-Mobile.",       0.25)
+	pair("[ >> ] Scanning camera positions...",                     "[ OK ] 4 cameras identified.",           0.28)
+	addLog("[ >> ] Destroying Camera 1/4...", DIM)
+	addLog("[ OK ] Camera 1 offline — feed dead.", RED)
+	setBar(0.31)
+	task.wait(0.08)
+	addLog("[ >> ] Destroying Camera 2/4...", DIM)
+	addLog("[ OK ] Camera 2 offline — blind spot created.", RED)
+	setBar(0.34)
+	task.wait(0.08)
+	addLog("[ >> ] Destroying Camera 3/4...", DIM)
+	addLog("[ OK ] Camera 3 offline — no witnesses.", RED)
+	setBar(0.37)
+	task.wait(0.08)
+	addLog("[ >> ] Destroying Camera 4/4...", DIM)
+	addLog("[ OK ] Camera 4 offline — surveillance cleared.", RED)
+	setBar(0.40)
+	task.wait(0.1)
+
+	statusHeader.Text = "EXECUTING ROBBERY"
+	statusHeader.TextColor3 = RED
+	pair("[ >> ] Initiating store robbery...",                      "[ OK ] Robbery started — clock running.", 0.43)
+	addLog("[ >> ] Grabbing Television...", DIM)
+	addLog("[ OK ] Television secured — bagged.", OK)
+	setBar(0.47)
+	task.wait(0.08)
+	addLog("[ >> ] Grabbing Phones...", DIM)
+	addLog("[ OK ] Phones swept — all units bagged.", OK)
+	setBar(0.51)
+	task.wait(0.08)
+	addLog("[ >> ] Grabbing Laptops...", DIM)
+	addLog("[ OK ] Laptops secured — Duffle Bag full.", OK)
+	setBar(0.55)
+	task.wait(0.1)
+
+	statusHeader.Text = "DELIVERING TO BUYER"
+	statusHeader.TextColor3 = GOLD
+	pair("[ >> ] Locating fence/buyer coordinates...",              "[ OK ] Buyer marked on radar.",           0.59)
+	pair("[ >> ] Heading to buyer — staying off main roads...",     "[ OK ] Arrived at buyer undetected.",     0.63)
+	pair("[ >> ] Offloading stolen goods...",                       "[ OK ] Goods accepted by buyer.",         0.67)
+
+	statusHeader.Text = "RUNNING VULNERABILITY EXPLOIT"
+	statusHeader.TextColor3 = CYAN
+	pair("[ >> ] Loading vulnerability exploit module...",          "[ OK ] Exploit module injected.",         0.70)
+	pair("[ >> ] Targeting economy server endpoint...",             "[ OK ] Endpoint found & flagged.",        0.73)
+	addLog("[ >> ] Running vulnerability sell loop — 200x...", DIM)
+	local sold = 0
+	for i = 1, 20 do
+		sold += 10
+		addLog("[ OK ] Batch " .. i .. "/20 — " .. sold .. "x sold successfully.", OK)
+		setBar(0.73 + (i / 20) * 0.10)
+		task.wait(0.05)
+	end
+	addLog("[ OK ] All 200 vulnerability cycles completed.", GOLD)
+	setBar(0.84)
+	task.wait(0.1)
+
+	statusHeader.Text = "INJECTING FUNDS"
+	statusHeader.TextColor3 = GOLD
+	addLog("[ >> ] Tallying robbery + exploit proceeds...", DIM)
+	addLog("[ OK ] Combined earnings calculated.", OK)
+	addLog("[ >> ] Injecting " .. fmt(MAX) .. " into wallet...", GOLD)
+
+	task.spawn(function() animateCounter(MAX, 2.4) end)
+	task.spawn(function()
+		for i = 1, 30 do
+			task.wait(0.05)
+			setBar(0.84 + (i/30) * 0.16)
+		end
+	end)
+	task.wait(2.5)
+
+	bigMoney.TextColor3 = GOLD
+	pulse(bigMoney, 76)
+
+	addLog("[ >> ] Writing balance to wallet ledger...", DIM)
+	addLog("[ OK ] " .. fmt(MAX) .. " deposited — balance confirmed.", CYAN)
+	statusHeader.Text = "OPERATION COMPLETE"
+	statusHeader.TextColor3 = CYAN
+	setBar(1.0)
+	pctLabel.Text = "100%"
+
+	bigMoney.TextColor3 = CYAN
+	pulse(bigMoney, 76)
+
+	statusHeader.Text = "PS2 MONEY GEN COMPLETE"
+	statusHeader.TextColor3 = GOLD
+
+	applyMoneyDisplay(MAX)
+
+	sub.Text = "Wallet → " .. fmt(MAX)
+	sub.TextColor3 = Color3.fromRGB(40, 220, 100)
+	sub.Visible = true
+
+	totalLabel.Text = "TOTAL GENERATED: " .. fmt(MAX)
+	totalLabel.Visible = true
+
+	task.wait(2.5)
+	fadeOutOverlay()
+end
+
+btn.MouseButton1Click:Connect(function()
+	btn.Active = false
+	btn.Text = "Working..."
+	btn.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
+	frame.Visible = false
+	overlay.Visible = true
+	task.spawn(runSequence)
+end)
